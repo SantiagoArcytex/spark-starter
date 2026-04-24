@@ -1,0 +1,194 @@
+erDiagram
+    auth_users ||--o| profiles : "user_id"
+    auth_users ||--o{ user_roles : "user_id"
+    auth_users ||--o| client_accounts : "user_id"
+
+    client_accounts ||--o| client_onboarding : "client_account_id"
+    client_accounts ||--o{ client_specialists : "client_account_id"
+    client_accounts ||--o{ tasks : "client_account_id"
+    client_accounts ||--o{ hour_blocks : "client_account_id"
+    client_accounts ||--o{ hour_credits : "client_account_id"
+    client_accounts ||--o{ invoices : "client_account_id"
+
+    profiles ||--o{ client_specialists : "specialist_id"
+    profiles ||--o{ specialist_milestones : "specialist_id"
+
+    tasks ||--o{ task_specialists : "task_id"
+    tasks ||--o{ task_credentials : "task_id"
+    tasks ||--o{ task_deliverables : "task_id"
+    tasks ||--o{ task_approvals : "task_id"
+    tasks ||--o{ task_activity_log : "task_id"
+    tasks ||--o{ messages : "task_id"
+    tasks ||--o{ time_logs : "task_id"
+
+    auth_users ||--o{ time_logs : "specialist_id"
+    auth_users ||--o{ messages : "sender_id"
+    auth_users ||--o{ notifications : "user_id"
+    auth_users ||--o{ task_approvals : "acted_by"
+    auth_users ||--o{ task_activity_log : "actor_id"
+    auth_users ||--o{ hour_credits : "credited_by"
+
+    auth_users {
+        uuid id PK
+        text email
+        jsonb raw_user_meta_data
+    }
+    profiles {
+        uuid id PK
+        uuid user_id
+        text email
+        text full_name
+        text company
+        text avatar_url
+        text specialist_bio
+        text specialist_certification
+        numeric salary
+        int health_score
+        timestamptz start_date
+    }
+    user_roles {
+        uuid id PK
+        uuid user_id
+        app_role role
+    }
+    client_accounts {
+        uuid id PK
+        uuid user_id
+        numeric hours_purchased
+        numeric hours_used
+        numeric current_rate
+        numeric monthly_allocation
+        numeric rollover_hours
+        text stripe_customer_id
+        text health_status
+        bool alert_70_sent
+        bool alert_90_sent
+        uuid assigned_pm_id
+        uuid assigned_specialist_id
+    }
+    client_onboarding {
+        uuid id PK
+        uuid client_account_id
+        text business_name
+        text industry
+        text crm_platform
+        bool has_existing_crm
+        text_array acquisition_channels
+        text primary_homepage
+        text_array landing_pages
+        text pain_points
+        text goals
+    }
+    client_specialists {
+        uuid id PK
+        uuid client_account_id
+        uuid specialist_id
+        uuid assigned_by
+    }
+    tasks {
+        uuid id PK
+        uuid client_account_id
+        text name
+        text description
+        text category
+        task_status status
+        text priority
+        bool is_urgent
+        bool at_risk
+        numeric estimated_hours
+        numeric actual_hours
+        uuid assigned_specialist_id
+        uuid requested_by
+        uuid created_by
+        jsonb subtasks
+    }
+    task_specialists {
+        uuid id PK
+        uuid task_id
+        uuid specialist_id
+        text role
+    }
+    task_credentials {
+        uuid id PK
+        uuid task_id
+        uuid client_id
+        text label
+        text credential_value
+    }
+    task_deliverables {
+        uuid id PK
+        uuid task_id
+        uuid uploaded_by
+        text file_name
+        text url
+        deliverable_type type
+    }
+    task_approvals {
+        uuid id PK
+        uuid task_id
+        uuid acted_by
+        approval_action action
+        text comment
+    }
+    task_activity_log {
+        uuid id PK
+        uuid task_id
+        uuid actor_id
+        text action
+        jsonb details
+    }
+    messages {
+        uuid id PK
+        uuid task_id
+        uuid sender_id
+        text content
+    }
+    time_logs {
+        uuid id PK
+        uuid specialist_id
+        uuid task_id
+        numeric hours
+        text description
+        bool billable
+        text activity_type
+        text activity_label
+        timestamptz logged_at
+    }
+    hour_blocks {
+        uuid id PK
+        uuid client_account_id
+        numeric hours
+        numeric rate
+        numeric total_amount
+        text stripe_payment_id
+    }
+    hour_credits {
+        uuid id PK
+        uuid client_account_id
+        uuid credited_by
+        numeric hours
+        text reason
+    }
+    invoices {
+        uuid id PK
+        uuid client_account_id
+        uuid hour_block_id
+        numeric total_amount
+        text status
+        text stripe_invoice_id
+    }
+    notifications {
+        uuid id PK
+        uuid user_id
+        uuid task_id
+        text title
+        text message
+        text type
+        bool read
+    }
+    specialist_milestones {
+        uuid id PK
+        uuid specialist_id
+        text title
+        timestamptz achieved_at
+    }
